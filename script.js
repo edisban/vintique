@@ -1,22 +1,28 @@
+// Helper function to save cart to localStorage
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
 
-const productGrid = document.getElementById("product-grid");
-const cartCount = document.getElementById("cart-count");
-const toast = document.getElementById("toast");
-const form = document.getElementById("product-form");
+// Retrieve DOM elements
+const productGrid = document.querySelector("#product-grid");
+const cartCount = document.querySelector("#cart-count");
+const toast = document.querySelector("#toast");
+const form = document.querySelector("#product-form");
 const backToTopBtn = document.createElement("div");
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let customProducts = [];
 
+// Initialize cart count
 if (cartCount) cartCount.textContent = cart.length;
 
-// Ενημέρωση καλαθιού
+// Update the cart count and save cart to localStorage
 function updateCart() {
   if (cartCount) cartCount.textContent = cart.length;
-  localStorage.setItem("cart", JSON.stringify(cart));
+  saveCart();
 }
 
-// Toast ειδοποίηση
+// Toast notification
 function showToast(message) {
   toast.textContent = message;
   toast.classList.remove("hidden");
@@ -27,14 +33,14 @@ function showToast(message) {
   }, 2500);
 }
 
-// Προσθήκη στο καλάθι
+// Add product to cart
 function addToCart(title, price) {
   cart.push({ title, price });
   updateCart();
   showToast(`Προστέθηκε στο καλάθι: ${title} ✅`);
 }
 
-// Δημιουργία κάρτας προϊόντος
+// Create product card
 function createProductCard(product, isCustom = false) {
   const div = document.createElement("div");
   div.className = "product";
@@ -49,12 +55,12 @@ function createProductCard(product, isCustom = false) {
     ${isCustom ? '<button class="delete-btn">🗑️ Διαγραφή</button>' : ""}
   `;
 
-  // Αν είναι custom προϊόν, πρόσθεσε δυνατότητα διαγραφής
+  // If it's a custom product, add delete functionality
   if (isCustom) {
     const deleteBtn = div.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", () => {
-      div.remove(); // Αφαιρεί την κάρτα από τη σελίδα
-      customProducts = customProducts.filter(p => p !== product); // Προαιρετικά καθαρίζει και από array
+      div.remove(); // Remove the product card from the page
+      customProducts = customProducts.filter(p => p !== product); // Optionally remove from customProducts array
       showToast("Το προϊόν διαγράφηκε 🗑️");
     });
   }
@@ -62,33 +68,35 @@ function createProductCard(product, isCustom = false) {
   return div;
 }
 
-
-// Φόρτωση API προϊόντων
-fetch("https://fakestoreapi.com/products")
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(product => {
-      productGrid.appendChild(createProductCard(product));
+// Fetch products from the API
+function fetchProducts() {
+  fetch("https://fakestoreapi.com/products")
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(product => {
+        productGrid.appendChild(createProductCard(product));
+      });
+    })
+    .catch(err => {
+      console.error("Σφάλμα κατά τη φόρτωση προϊόντων:", err);
+      productGrid.innerHTML = "<p>Αποτυχία φόρτωσης προϊόντων. Παρακαλώ δοκιμάστε ξανά αργότερα.</p>";
     });
-  })
-  .catch(err => {
-    console.error("Σφάλμα κατά τη φόρτωση προϊόντων:", err);
-  });
+}
 
-// Burger menu toggle
+// Toggle burger menu visibility
 function toggleMenu() {
   document.querySelector("nav").classList.toggle("active");
 }
 
-// Submit custom product
+// Handle custom product form submission
 if (form) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const title = document.getElementById("title").value;
-    const brand = document.getElementById("brand").value;
-    const image = document.getElementById("image").value;
-    const price = parseFloat(document.getElementById("price").value);
-    const description = document.getElementById("description").value;
+    const title = document.querySelector("#title").value;
+    const brand = document.querySelector("#brand").value;
+    const image = document.querySelector("#image").value;
+    const price = parseFloat(document.querySelector("#price").value);
+    const description = document.querySelector("#description").value;
 
     if (title && image && !isNaN(price) && description) {
       const newProduct = {
@@ -99,21 +107,21 @@ if (form) {
       };
       customProducts.push(newProduct);
       productGrid.prepend(createProductCard(newProduct, true));
-      document.getElementById("modal").classList.add("hidden");
+      document.querySelector("#modal").classList.add("hidden");
       form.reset();
       showToast("Το προϊόν προστέθηκε ✔️");
     }
   });
 }
 
-// Preview εικόνας κατά την πληκτρολόγηση (αν θέλεις: δες html πλευρά)
-document.getElementById("image")?.addEventListener("input", e => {
-  const preview = document.getElementById("image-preview");
+// Preview image while typing the image URL
+document.querySelector("#image")?.addEventListener("input", e => {
+  const preview = document.querySelector("#image-preview");
   if (preview) preview.src = e.target.value;
 });
 
-// Dark mode toggle
-const darkToggle = document.getElementById("dark-toggle");
+// Toggle dark mode
+const darkToggle = document.querySelector("#dark-toggle");
 
 function updateDarkIcon() {
   darkToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
@@ -125,20 +133,22 @@ darkToggle.onclick = () => {
   updateDarkIcon();
 };
 
-// Εφαρμογή από localStorage
+// Apply saved theme from localStorage
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
 updateDarkIcon();
 
-
-// Back to top
+// Back to top button functionality
 backToTopBtn.id = "backToTop";
-backToTopBtn.innerHTML = "↑";
+backToTopBtn.innerHTML = "⬆️"; // Custom arrow icon
 document.body.appendChild(backToTopBtn);
 
-window.onscroll = () => {
+window.addEventListener('scroll', () => {
   backToTopBtn.style.display = window.scrollY > 300 ? "block" : "none";
-};
+});
 
 backToTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+// Fetch products initially
+fetchProducts();
