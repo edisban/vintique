@@ -1,0 +1,39 @@
+/* Modal overlay & card */
+.modal-overlay{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; backdrop-filter: blur(2px);
+}
+.modal{
+  background: #fff; color: inherit;
+  width: min(560px, 92vw);
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 40px rgba(0,0,0,.14);
+}
+
+/* Dark mode */
+body.dark .modal{ background:#1e1e1e; color:#eee; }
+
+/* Inputs inside modal */
+.modal input[type="file"], .modal input, .modal textarea{
+  width: 100%;
+  border: 1px solid #dcdcdc;
+  border-radius: 12px;
+  padding: .7rem .8rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  margin-top: .5rem;
+}
+.modal input:focus, .modal textarea:focus{
+  border-color: #129d86;
+  box-shadow: 0 0 0 3px rgba(18,157,134,.15);
+}
+
+.modal-actions{
+  display:flex; gap:10px; justify-content:flex-end; margin-top: 12px;
+}
+.modal-actions button{
+  border-radius: 12px;
+}
